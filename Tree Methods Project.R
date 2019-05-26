@@ -24,15 +24,17 @@ str(df)
 
 
 ggplot(df, aes(x = Room.Board, y = Grad.Rate)) +
-    geom_point(aes(color = Private)) +
+    geom_point(aes(color = Private), alpha = .5, size = 2) +
+    geom_smooth(method = lm, se = FALSE, color = 'red', size = .5) +
     theme_clean()
 
 ggplot(df, aes(F.Undergrad)) +
-    geom_histogram(aes(fill = Private), color = 'black') +
-    theme_clean()
+    geom_histogram(aes(fill = Private), color = 'black', bins = 50, alpha = .5) +
+    theme_bw()
 
 ggplot(df, aes(Grad.Rate)) +
-    geom_histogram(aes(fill = Private), color = 'black')
+    geom_histogram(aes(fill = Private), color = 'black', bins = 50, alpha =0.6) +
+    theme_bw()
 
 subset(df, Grad.Rate > 100)
 
@@ -48,10 +50,14 @@ library(rpart.plot)
 tree <- rpart(Private ~ ., method = 'class', data = train)
 prp(tree)
 
+#####
+## TRAIN MODEL
+#####
+
 tree.prediction <- predict(tree, test)
 head(tree.prediction)
 
-
+#####
 # Turn these two columns into one column to match the original Yes/No Label for a Private column. 
 
 tree.prediction <- data.frame(tree.prediction)
@@ -65,6 +71,7 @@ joiner <- function(x){
         return('No')
     }
 }
+#####
 # Next to create a new column in the test.prediction data frame assign the sapply function to the variable tree.prediction$Private. 
 
 tree.prediction$Private <- sapply(tree.prediction$Yes, joiner)
@@ -72,13 +79,16 @@ head(tree.prediction)
 
 table(tree.prediction$Private, test$Private)
 prp(tree)
-
+summary(tree)
+#####
+## RANDOM FOREST
+#####
 
 library(randomForest)
 
 randomForest.model <- randomForest(Private ~ ., data = train, importance = TRUE)
 
-randomForest.model$confusion
+randomForest.model$confusion # Based on training data
 randomForest.model$importance
 p <- predict(randomForest.model, test)
 
