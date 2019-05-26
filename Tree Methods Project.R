@@ -72,3 +72,14 @@ head(tree.prediction)
 
 table(tree.prediction$Private, test$Private)
 prp(tree)
+
+
+library(randomForest)
+
+randomForest.model <- randomForest(Private ~ ., data = train, importance = TRUE)
+
+randomForest.model$confusion
+randomForest.model$importance
+p <- predict(randomForest.model, test)
+
+table(p, test$Private)
